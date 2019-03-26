@@ -17,8 +17,8 @@ void checkBoardState();
 int board[8][8];
 
 //boardState represents the number of strings of 2, 3, and 4 pieces for each player
-//indexs 0 and 3 are two length lines, 1 and 4 are three length lines, 2 and 5 are four length lines
-int boardState[6];
+//and the number of 2 and 3 strings that were blocked by the opposing player
+int boardState[10];
 
 int main(int argc, char** argv)
 {
@@ -132,7 +132,7 @@ void checkBoardState()
             centralPiece = board[i][n];
             if(centralPiece == 1 || centralPiece == 2)
             {
-
+                //TODO: Add to board state array according to pieces around centralPiece
             }
         }
     }
@@ -140,5 +140,7 @@ void checkBoardState()
 
 int AiMove()
 {
-    return 1;
+    //TODO: Algorithm that makes move to block opponent from winning, or 
+    //maximizes beneficial impact on board state array according to 
+    //weighted value of 2, 3, blocked 2, and blocked 3 lines
 }
