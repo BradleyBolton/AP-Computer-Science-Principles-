@@ -16,8 +16,8 @@ void checkBoardState();
 
 int board[8][8];
 
-//boardState represents the number of strings of 2, 3, and 4 pieces for each player
-//and the number of 2 and 3 strings that were blocked by the opposing player
+//boardState represents the number of strings of 2, 3, and 4 pieces for each player, and blocked strings
+//indexs 0 and 1 are two length lines, 2 and 3 are three length lines, 4 and 5 are four length lines, 6 and 7 are blocked 2 length lines, 8 and 9 are blocked 3 length lines
 int boardState[10];
 
 int main(int argc, char** argv)
@@ -125,14 +125,45 @@ int placePiece(int rowChoice, bool player)
 void checkBoardState()
 {
     int centralPiece;
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++) //iterates through board
     {
         for (int n = 0; n < 8; n++)
         {
             centralPiece = board[i][n];
             if(centralPiece == 1 || centralPiece == 2)
             {
-                //TODO: Add to board state array according to pieces around centralPiece
+                for (int j = -1; j < 2; j++) //iterates around piece
+                {
+                    for (int k = -1; k < 2; k++)
+                    {
+                        if(board[i+j][n+k] == centralPiece && (j != 0 || k != 0)) //checks for 2nd in string
+                        {
+                            if(board[i+j*2][n+k*2] == centralPiece) //checks for 3rd in string
+                            {
+                                if(board[i+j*3][n+k*3] == centralPiece) //checks for 4th in string
+                                {
+                                   boardState[3+centralPiece]++; //records boardstate of 4 in string
+                                }
+                                else if(board[i+j*3][n+k*3] > 0) //checks for block at 4th point in string
+                                {
+                                    boardState[7+centralPiece]++; //records boardstate of blocked 3 string
+                                }
+                                else
+                                {
+                                    boardState[1+centralPiece]++; //records boardstate of unblocked 3 string
+                                }
+                            }
+                            else if(board[i+j*2][n+k*2] > 0) //checks for block at 3rd point in string
+                            {
+                                boardState[5+centralPiece]++; //records boardstate of blocked 2 string
+                            }
+                            else
+                            {
+                                boardState[-1+centralPiece]++; //records boardstate of unblocked 2 string
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -143,4 +174,5 @@ int AiMove()
     //TODO: Algorithm that makes move to block opponent from winning, or 
     //maximizes beneficial impact on board state array according to 
     //weighted value of 2, 3, blocked 2, and blocked 3 lines
+    return 1;
 }
