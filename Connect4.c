@@ -12,6 +12,7 @@ int drawBoard();
 int placePiece(int rowChoice, bool player);
 int AiMove();
 void checkBoardState();
+void printBoardState(); //debug function
 
 
 int board[8][8];
@@ -58,6 +59,8 @@ int main(int argc, char** argv)
             placePiece(rowChoice, player);
             player = !player;
             drawBoard();
+            //checkBoardState();
+            //printBoardState();
         }
         else
         {
@@ -122,8 +125,13 @@ int placePiece(int rowChoice, bool player)
     return 0;
 }
 
+//W.I.P.
 void checkBoardState()
 {
+    for (int i = 0; i < 10; i++) //clears boardState
+    {
+        boardState[i] = 0;
+    }
     int centralPiece;
     for (int i = 0; i < 8; i++) //iterates through board
     {
@@ -144,22 +152,22 @@ void checkBoardState()
                                 {
                                    boardState[3+centralPiece]++; //records boardstate of 4 in string
                                 }
-                                else if(board[i+j*3][n+k*3] > 0) //checks for block at 4th point in string
+                                else
+                                {
+                                    boardState[1+centralPiece]++; //records boardstate of 3 string
+                                }
+                                if(board[i+j*3][n+k*3] > 0) //checks for block at 4th point in string
                                 {
                                     boardState[7+centralPiece]++; //records boardstate of blocked 3 string
                                 }
-                                else
-                                {
-                                    boardState[1+centralPiece]++; //records boardstate of unblocked 3 string
-                                }
-                            }
-                            else if(board[i+j*2][n+k*2] > 0) //checks for block at 3rd point in string
-                            {
-                                boardState[5+centralPiece]++; //records boardstate of blocked 2 string
                             }
                             else
                             {
-                                boardState[-1+centralPiece]++; //records boardstate of unblocked 2 string
+                                boardState[-1+centralPiece]++; //records boardstate of 2 string
+                            }
+                            if(board[i+j*2][n+k*2] > 0) //checks for block at 3rd point in string
+                            {
+                                boardState[5+centralPiece]++; //records boardstate of blocked 2 string
                             }
                         }
                     }
@@ -169,10 +177,21 @@ void checkBoardState()
     }
 }
 
+//debug tool
+void printBoardState()
+{
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%d", boardState[i]);
+    }
+    printf("\n");
+}
+
 int AiMove()
 {
-    //TODO: Algorithm that makes move to block opponent from winning, or 
-    //maximizes beneficial impact on board state array according to 
+    //TODO: Algorithm that makes move to block opponent from winning, or
+    //maximizes beneficial impact on board state array according to
     //weighted value of 2, 3, blocked 2, and blocked 3 lines
     return 1;
+}n 1;
 }
