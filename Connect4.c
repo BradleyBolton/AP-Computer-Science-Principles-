@@ -2,7 +2,7 @@
  * Connect4.c
  * This program allows the user to play connect 4 against another user or the computer.
  * The AI will evaluate one move in advance, and prioritize building multiple strings of pieces while blocking the opponents when an immeadiate victory is not possible.
- * Last worked on 4/4/2019
+ * Last worked on 4/10/2019
  */
 
 #include <stdio.h>
@@ -200,26 +200,34 @@ void checkBoardState()
                                         {
                                             if(board[i+j*3][n+k*3] == centralPiece) //checks for 4th in string
                                             {
-                                                boardState[3+centralPiece]++; //records boardstate of 4 in string
+                                                boardState[3+centralPiece]++; //records boardstate of 4 string
+                                            }
+                                            else if (board[i+j*3][n+k*3] == 0) //checks for unblocked 3 string
+                                            {
+                                                boardState[1+centralPiece]++; //records boardstate of unblocked 3 string
                                             }
                                             else
-                                            {
-                                                boardState[1+centralPiece]++; //records boardstate of 3 string
-                                            }
-                                            if(board[i+j*3][n+k*3] > 0) //checks for block at 4th point in string
                                             {
                                                 boardState[7+centralPiece]++; //records boardstate of blocked 3 string
                                             }
                                         }
+                                        else
+                                        {
+                                            boardState[7+centralPiece]++; //records boardstate of blocked 3 string (block from edge of game board)
+                                        }
+                                    }
+                                    else if (board[i+j*2][n+k*2] == 0) //checks for unblocked 2 string
+                                    {
+                                        boardState[-1+centralPiece]++; //records boardstate of unblocked 2 string
                                     }
                                     else
                                     {
-                                        boardState[-1+centralPiece]++; //records boardstate of 2 string
-                                    }
-                                    if(board[i+j*2][n+k*2] > 0) //checks for block at 3rd point in string
-                                    {
                                         boardState[5+centralPiece]++; //records boardstate of blocked 2 string
                                     }
+                                }
+                                else
+                                {
+                                    boardState[5+centralPiece]++; //records boardstate of blocked 2 string (block from edge of game board)
                                 }
                             }
                         }
@@ -307,6 +315,6 @@ void initializeAi()
     moveWeight[0] = 1;
     moveWeight[1] = 12;
     moveWeight[2] = 10000;
-    moveWeight[3] = 2;
-    moveWeight[4] = 10000;
+    moveWeight[3] = 5;
+    moveWeight[4] = 100;
 }
