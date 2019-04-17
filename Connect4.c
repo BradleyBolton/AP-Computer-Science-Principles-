@@ -24,9 +24,14 @@ int board[8][8];
 //boardState represents the number of strings of 2, 3, and 4 pieces for each player, and blocked strings
 //indexs 0 and 1 are two length lines, 2 and 3 are three length lines, 4 and 5 are four length lines, 6 and 7 are blocked 2 length lines, 8 and 9 are blocked 3 length lines
 int boardState[10];
-int moveWeight[5]; //moveWeight allows for the value of a specific board state to be adjusted for varied AI decisions across games
+int moveWeight[5]; //allows for the value of a specific board state to be adjusted for varied AI decisions across games
 int previousAiMove; //tracking the ai's previous move allows for it to player less vertically, which is generally a better strategy but not always reflected perfectly in the algorithm
 int roundCounter; //tracks the number of moves the player has made
+int baseState[10]; //serves as a comparison point for AI decision making
+int moveValue[8]; //used to compare the value of each possible move for the AI
+int minValue = 1000; //Will represent the weighted value of the AI's move being considered
+int exchangeValue = 0; //Represents the value of a specific play and counter-play the AI may decide to engage in
+int bestMove = 0; //Represents which collumn is the optimal play for the AI to make
 
 
 int main(int argc, char** argv)
@@ -251,9 +256,7 @@ void printBoardState()
 int AiMove() //Algorithm to decide what move the AI will make
 {
     checkBoardState();
-    int baseState[10]; //Will serve as a comparison point
-    int moveValue[8]; //Will be used to compare the value of each possible move
-    int minValue = 1000; //Will represent the weighted value of the AI's move being considered
+    minValue = 1000; //Will represent the weighted value of the AI's move being considered
     for (int i = 0; i < 10; i++)
     {
     baseState[i] = boardState[i]; //Copies the board state before the Ai's move
@@ -275,7 +278,7 @@ int AiMove() //Algorithm to decide what move the AI will make
             {
                 if (board[0][n] == 0)
                 {
-                    int exchangeValue = 0;
+                    exchangeValue = 0;
                     placePiece(n, true);
                     checkBoardState();
                     removePiece(n); //This line and the 2 above it create a theoretical board state to examine
@@ -297,7 +300,7 @@ int AiMove() //Algorithm to decide what move the AI will make
             removePiece(i); //removes theoretical piece
         }
     }
-    int bestMove = 0;
+    bestMove = 0;
     for (int i = 0; i < 8; i++)
     {
         if ((moveValue[i] >= moveValue[bestMove] && i != previousAiMove) || moveValue[i] > moveValue[bestMove])
@@ -312,9 +315,9 @@ int AiMove() //Algorithm to decide what move the AI will make
 
 void initializeAi()
 {
-    moveWeight[0] = 1;
-    moveWeight[1] = 12;
+    moveWeight[0] = 1 + (rand() % 3);
+    moveWeight[1] = 7 + (rand() % 5);
     moveWeight[2] = 10000;
-    moveWeight[3] = 5;
+    moveWeight[3] = 5 + (rand() % 4);
     moveWeight[4] = 100;
 }
