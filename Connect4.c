@@ -19,7 +19,6 @@ void checkBoardState();
 void printBoardState(); //debug function
 void initializeAi();
 
-
 int board[8][8];
 
 //boardState represents the number of strings of 2, 3, and 4 pieces for each player, and blocked strings
@@ -28,6 +27,7 @@ int boardState[10];
 int moveWeight[5]; //moveWeight allows for the value of a specific board state to be adjusted for varied AI decisions across games
 int previousAiMove; //tracking the ai's previous move allows for it to player less vertically, which is generally a better strategy but not always reflected perfectly in the algorithm
 int roundCounter; //tracks the number of moves the player has made
+
 
 int main(int argc, char** argv)
 {
