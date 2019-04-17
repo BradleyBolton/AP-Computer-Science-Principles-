@@ -2,7 +2,7 @@
  * Connect4.c
  * This program allows the user to play connect 4 against another user or the computer.
  * The AI will evaluate one move in advance, and prioritize building multiple strings of pieces while blocking the opponents when an immeadiate victory is not possible.
- * Last worked on 4/10/2019
+ * Last worked on 4/17/2019
  */
 
 #include <stdio.h>
