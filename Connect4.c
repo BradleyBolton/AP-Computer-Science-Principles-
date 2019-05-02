@@ -1,8 +1,7 @@
-/* Bradley Bolton
- * Connect4.c
+/* Connect4.c
  * This program allows the user to play connect 4 against another user or the computer.
  * The AI will evaluate one move in advance, and prioritize building multiple strings of pieces while blocking the opponents when an immeadiate victory is not possible.
- * Last worked on 4/17/2019
+ * Last worked on 5/1/2019
  */
 
 #include <stdio.h>
@@ -12,17 +11,18 @@
 
 void generateNewBoard();
 void drawBoard();
-void placePiece(int collumnChoice, bool player);
-void removePiece(int collumnChoice);
+void placePiece(int columnChoice, bool player);
+void removePiece(int columnChoice);
 int AiMove();
-void checkBoardState();
+void checkBoardState(); //allows AI to evaluate board
 void printBoardState(); //debug function
-void initializeAi();
+void initializeAi(); //generates a set of weighted values for AI to evaluate board
 
 int board[8][8];
 
 //boardState represents the number of strings of 2, 3, and 4 pieces for each player, and blocked strings
-//indexs 0 and 1 are two length lines, 2 and 3 are three length lines, 4 and 5 are four length lines, 6 and 7 are blocked 2 length lines, 8 and 9 are blocked 3 length lines
+//indexes 0, 2, 4, 6, and 8 are, in order, player 1's lines of 2 pieces, lines of 3 pieces, lines of 4 pieces, blocked lines of opponents 2 pieces, and blocked lines of opponents 3 pieces
+//indexes 1, 3, 5, 7, and 9 are, in order, player 2's lines of 2 pieces, lines of 3 pieces, lines of 4 pieces, blocked lines of opponents 2 pieces, and blocked lines of opponents 3 pieces
 int boardState[10];
 int moveWeight[5]; //allows for the value of a specific board state to be adjusted for varied AI decisions across games
 int previousAiMove; //tracking the ai's previous move allows for it to player less vertically, which is generally a better strategy but not always reflected perfectly in the algorithm
@@ -31,7 +31,7 @@ int baseState[10]; //serves as a comparison point for AI decision making
 int moveValue[8]; //used to compare the value of each possible move for the AI
 int minValue = 1000; //Will represent the weighted value of the AI's move being considered
 int exchangeValue = 0; //Represents the value of a specific play and counter-play the AI may decide to engage in
-int bestMove = 0; //Represents which collumn is the optimal play for the AI to make
+int bestMove = 0; //Represents which column is the optimal play for the AI to make
 
 
 int main(int argc, char** argv)
@@ -47,50 +47,50 @@ int main(int argc, char** argv)
         printf("Error: Only 1 or 2 players are supported in Connect4\n");
         return 1;
     }
-    generateNewBoard();
-    drawBoard();
-    initializeAi();
-    roundCounter = 0;
+    generateNewBoard(); //properly fills the array to describe the game board
+    drawBoard(); //prints the game board
+    initializeAi(); //creates the weighted values the AI uses to determine the value of a move
+    roundCounter = 0; //counts how many rounds of turns the game has gone through
     bool player = true; //used to track which player is making their move
-    int collumnChoice;
+    int columnChoice; //represents the column a piece is being dropped in
     while (true)
     {
         if (player)
         {
-            printf("Player X, select the collumn to drop your piece.\n");
-            collumnChoice = get_int() - 1;
+            printf("Player X, select the column to drop your piece.\n");
+            columnChoice = get_int() - 1;
             roundCounter++;
         }
         else if (playerCount == 2)
         {
-            printf("Player O, select the collumn to drop your piece.\n");
-            collumnChoice = get_int() - 1;
+            printf("Player O, select the column to drop your piece.\n");
+            columnChoice = get_int() - 1;
         }
         else if (roundCounter == 1)
         {
             if (board[7][3] == 1)
             {
-                collumnChoice = 4;
+                columnChoice = 4;
             }
             else
             {
-                collumnChoice = 3;
+                columnChoice = 3;
             }
         }
         else
         {
-            collumnChoice = AiMove();
+            columnChoice = AiMove();
         }
-        while ((collumnChoice > 7 || collumnChoice < 0) && board[0][collumnChoice] != 0) //ensures valid input
+        while ((columnChoice > 7 || columnChoice < 0) && board[0][columnChoice] != 0) //ensures valid input
         {
-            printf("Invalid collumn choice. Please retry\n");
-            collumnChoice = get_int() - 1;
+            printf("Invalid column choice. Please retry\n");
+            columnChoice = get_int() - 1;
         }
-        placePiece(collumnChoice, player);
+        placePiece(columnChoice, player);
         player = !player; //swaps who's turn it is
         drawBoard();
         checkBoardState(); //used to determine if a player has won
-        printBoardState(); //debug tool
+        //printBoardState(); //debug tool to show how the AI sees the board
         if (boardState[4] > 0)
         {
             printf("Player X has won! It took %d rounds.\n", roundCounter);
@@ -123,7 +123,7 @@ void generateNewBoard() //sets all board locations to empty
 
 void drawBoard()
 {
-    printf(" 1   2   3   4   5   6   7   8\n"); //marks collumn choices
+    printf(" 1   2   3   4   5   6   7   8\n"); //marks column choices
     for (int i = 0; i < 8; i++)
     {
         for (int n = 0; n < 8; n++)
@@ -145,37 +145,41 @@ void drawBoard()
     }
 }
 
-void placePiece(int collumnChoice, bool player)
+void placePiece(int columnChoice, bool player)
 {
     int i = 0;
-    while (board[i + 1][collumnChoice] == 0 && i < 7) //determines proper row for piece to be placed in collumn
+    while (board[i + 1][columnChoice] == 0 && i < 7) //determines proper row for piece to be placed in column
     {
         i++;
+        if (i == 7)
+        {
+            break;
+        }
     }
-    if (board[i][collumnChoice] == 0) //redundant check that the spot on the board is unoccupied
+    if (board[i][columnChoice] == 0) //redundant check that the spot on the board is unoccupied
     {
         if (player)
         {
-            board[i][collumnChoice] = 1; //sets player 1 piece
+            board[i][columnChoice] = 1; //sets player 1 piece
         }
         else
         {
-            board[i][collumnChoice] = 2; //sets player 2 or AI piece
+            board[i][columnChoice] = 2; //sets player 2 or AI piece
         }
     }
 }
 
-void removePiece(int collumnChoice)
+void removePiece(int columnChoice) //used by AI to temporarily make theoretical moves to examine the result of a considered play
 {
     int i = 0;
-    while (board[i + 1][collumnChoice] == 0 && i < 7) //determines proper row for piece to be removed in collumn
+    while (board[i + 1][columnChoice] == 0 && i < 7) //determines proper row for piece to be removed in column
     {
         i++;
     }
-    board[i + 1][collumnChoice] = 0; //removes piece
+    board[i + 1][columnChoice] = 0; //removes piece
 }
 
-void checkBoardState()
+void checkBoardState() //Fills out the array boardState[] to allow the AI to properly analyze potential moves
 {
     for (int i = 0; i < 10; i++) //clears boardState
     {
@@ -213,12 +217,12 @@ void checkBoardState()
                                             }
                                             else
                                             {
-                                                boardState[7+centralPiece]++; //records boardstate of blocked 3 string
+                                                boardState[8+centralPiece]++; //records boardstate of blocked 3 string
                                             }
                                         }
                                         else
                                         {
-                                            boardState[7+centralPiece]++; //records boardstate of blocked 3 string (block from edge of game board)
+                                            boardState[8+centralPiece]++; //records boardstate of blocked 3 string (block from edge of game board)
                                         }
                                     }
                                     else if (board[i+j*2][n+k*2] == 0) //checks for unblocked 2 string
@@ -227,12 +231,12 @@ void checkBoardState()
                                     }
                                     else
                                     {
-                                        boardState[5+centralPiece]++; //records boardstate of blocked 2 string
+                                        boardState[6+centralPiece]++; //records boardstate of blocked 2 string
                                     }
                                 }
                                 else
                                 {
-                                    boardState[5+centralPiece]++; //records boardstate of blocked 2 string (block from edge of game board)
+                                    boardState[6+centralPiece]++; //records boardstate of blocked 2 string (block from edge of game board)
                                 }
                             }
                         }
@@ -256,7 +260,7 @@ void printBoardState()
 int AiMove() //Algorithm to decide what move the AI will make
 {
     checkBoardState();
-    minValue = 1000; //Will represent the weighted value of the AI's move being considered
+    minValue = 32767; //Will represent the weighted value of the AI's move being considered
     for (int i = 0; i < 10; i++)
     {
     baseState[i] = boardState[i]; //Copies the board state before the Ai's move
@@ -265,13 +269,14 @@ int AiMove() //Algorithm to decide what move the AI will make
     {
         if (board[0][i] == 0)
         {
-            //printf("Considering collumn %d.\n", i); //debug tool
+            //printf("Considering column %d.\n", i); //debug tool
             placePiece(i, false); //places theoretical piece to examine result on boardstate
+            checkBoardState();
             if (boardState[5] > 0)
             {
-                //printf("One move win detected, playing it.\n"); //debug tool
+                //printf("One move win detected, playing it.\n"); //debug tool to check if the AI knows it can win with a certain move
                 removePiece(i); //removes theoretical piece
-                printf("AI attempting to place piece in collumn %d...\n", i + 1);
+                printf("AI placed piece in column %d.\n", i + 1);
                 return i;
             }
             for (int n = 0; n < 8; n++)
@@ -282,10 +287,10 @@ int AiMove() //Algorithm to decide what move the AI will make
                     placePiece(n, true);
                     checkBoardState();
                     removePiece(n); //This line and the 2 above it create a theoretical board state to examine
-                    for (int k = 0; k < 6; k += 2)
+                    for (int k = 0; k < 8; k += 2)
                     {
-                        exchangeValue += (boardState[k + 1] - baseState[k + 1]) * moveWeight[k / 2];
-                        exchangeValue -= (boardState[k] - baseState[k]) * moveWeight[k / 2];
+                        exchangeValue += (boardState[k + 1] - baseState[k + 1]) * moveWeight[k / 2]; //adds the value of the changes in board state for the AI's pieces
+                        exchangeValue -= (boardState[k] - baseState[k]) * moveWeight[k / 2]; //subtracts the value of the changes in board state for the opponent's pieces
                     }
                     if (exchangeValue < minValue)
                     {
@@ -295,13 +300,13 @@ int AiMove() //Algorithm to decide what move the AI will make
                 }
             }
             moveValue[i] = minValue;
-            //printf("minValue for collumn %d evaluated to %d.\n", i, minValue); //debug tool
+            //printf("minValue for column %d evaluated to %d.\n", i, minValue); //debug tool
             minValue = 1000;
             removePiece(i); //removes theoretical piece
         }
     }
     bestMove = 0;
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++) //determines which column has the best worst case value for the AI to play in
     {
         if ((moveValue[i] >= moveValue[bestMove] && i != previousAiMove) || moveValue[i] > moveValue[bestMove])
         {
@@ -309,15 +314,15 @@ int AiMove() //Algorithm to decide what move the AI will make
         }
     }
     previousAiMove = bestMove;
-    printf("AI attempting to place piece in collumn %d...\n", bestMove + 1);
+    printf("AI placed piece in column %d.\n", bestMove + 1);
     return bestMove;
 }
 
-void initializeAi()
+void initializeAi() //Initializes an AI that values certain board states in varied ways
 {
-    moveWeight[0] = 1 + (rand() % 3);
-    moveWeight[1] = 7 + (rand() % 5);
-    moveWeight[2] = 10000;
-    moveWeight[3] = 5 + (rand() % 4);
-    moveWeight[4] = 100;
+    moveWeight[0] = 1 + (rand() % 3); //Value of having 2 pieces in a line
+    moveWeight[1] = 7 + (rand() % 5); //Value of having 3 pieces in a line
+    moveWeight[2] = 10000; //Value of having 4 pieces in a line (Extremely high as this is the game's win condition)
+    moveWeight[3] = 5 + (rand() % 4); //Value of blocking an opponent's 2 piece line
+    moveWeight[4] = 100; //Value of blocking an opponent's 3 piece line
 }
